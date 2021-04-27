@@ -1,5 +1,5 @@
-import React, {memo} from 'react';
-import {Text} from 'react-native';
+import React, {memo, useEffect} from 'react';
+import {Text, StyleSheet} from 'react-native';
 import {connect} from 'react-redux';
 import {compose} from 'redux';
 import {createStructuredSelector} from 'reselect';
@@ -10,23 +10,33 @@ import styled from 'styled-components/native';
 import Button from '../../components/Button';
 import Input from '../../components/Input';
 import Spacing from '../../components/Spacing';
+import RNPickerSelect from 'react-native-picker-select';
 
 // utils
 import {useInjectReducer} from '../../utils/injectReducer';
 import {useInjectSaga} from '../../utils/injectSaga';
 
 // redux
-import {makeSelectRequesting} from './redux/selectors';
+import {makeSelectRequesting, makeSelectCountries} from './redux/selectors';
 import saga from './redux/saga';
 import reducer from './redux/reducer';
-import {phoneVerification} from './redux/actions';
+import {phoneVerification, getCountries} from './redux/actions';
 
 // constants
 const key = 'phoneVerification';
 
-const PhoneVerification = ({onSubmitForm, requesting}) => {
+const PhoneVerification = ({
+  onSubmitForm,
+  requesting,
+  onGetCountries,
+  countries,
+}) => {
   useInjectReducer({key, reducer});
   useInjectSaga({key, saga});
+
+  useEffect(() => {
+    onGetCountries();
+  }, []);
 
   const {
     control,
@@ -41,21 +51,36 @@ const PhoneVerification = ({onSubmitForm, requesting}) => {
     <Container>
       <LoginContainer>
         <HeaderText>Please Verify your phone Number!</HeaderText>
-        <Controller
-          control={control}
-          render={({field: {onChange, onBlur, value}}) => (
-            <Input
-              onBlur={onBlur}
-              placeholder="Phone No"
-              onChangeText={value => onChange(value)}
-              value={value}
-            />
-          )}
-          name="phone"
-          rules={{required: true}}
-          defaultValue=""
+        <RNPickerSelect
+          useNativeAndroidPickerStyle={false}
+          placeholder={{ label: "Select your country", value: null }}
+          onValueChange={value => console.log(value)}
+          style={customPickerStyles}
+          items={
+            countries &&
+            countries.map(item => ({
+              label: item.value,
+              value: item.key,
+            }))
+          }
         />
-        {errors.phone && <Text>This is required.</Text>}
+        <Spacing>
+          <Controller
+            control={control}
+            render={({field: {onChange, onBlur, value}}) => (
+              <Input
+                onBlur={onBlur}
+                placeholder="Phone No"
+                onChangeText={value => onChange(value)}
+                value={value}
+              />
+            )}
+            name="phone"
+            rules={{required: true}}
+            defaultValue=""
+          />
+          {errors.phone && <Text>This is required.</Text>}
+        </Spacing>
         <Spacing>
           <Button loading={requesting} onPress={handleSubmit(onSubmit)}>Continue</Button>
         </Spacing>
@@ -66,9 +91,11 @@ const PhoneVerification = ({onSubmitForm, requesting}) => {
 
 const mapStateToProps = createStructuredSelector({
   requesting: makeSelectRequesting(),
+  countries: makeSelectCountries(),
 });
 
 export const mapDispatchToProps = dispatch => ({
+  onGetCountries: () => dispatch(getCountries()),
   onSubmitForm: data => dispatch(phoneVerification(data)),
 });
 
@@ -95,3 +122,25 @@ const HeaderText = styled.Text`
   text-align: center;
   padding-bottom: 30px;
 `;
+
+const customPickerStyles = StyleSheet.create({
+  inputIOS: {
+    fontSize: 14,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderWidth: 1,
+    borderColor: '#FFB6C1',
+    borderRadius: 8,
+    color: 'black',
+    paddingRight: 30, // to ensure the text is never behind the icon
+  },
+  inputAndroid: {
+    fontSize: 14,
+    paddingHorizontal: 20,
+    paddingVertical: 8,
+    borderWidth: 1,
+    borderColor: '#FFB6C1',
+    borderRadius: 8,
+    color: 'black',
+  },
+});

@@ -5,6 +5,15 @@ export const phoneVerification = data => ({
   data,
 });
 
+export const getCountries = () => ({
+  type: types.getCountries,
+});
+
+export const getCountriessSuccess = data => ({
+  type: types.getCountriessSuccess,
+  data,
+});
+
 export const reset = () => ({
   type: types.reset,
 });

@@ -9,4 +9,9 @@ const makeSelectRequesting = () =>
     state => state.requesting,
   );
 
-export { makeSelectRequesting };
+const makeSelectCountries = () =>
+  createSelector(
+    selectPhoneVerification,
+    state => state.countries,
+  );
+export { makeSelectRequesting, makeSelectCountries };
