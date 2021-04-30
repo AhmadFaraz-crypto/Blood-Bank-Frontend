@@ -5,6 +5,7 @@ const Input = styled.TextInput`
   border: 1px solid #FFB6C1;
   border-radius: 10px;
   padding-left: 20px;
+  width: 72%;
 `;
 
 

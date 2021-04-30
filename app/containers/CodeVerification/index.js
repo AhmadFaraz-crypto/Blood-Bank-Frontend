@@ -1,10 +1,10 @@
-import React, { memo } from 'react';
-import { Text } from 'react-native';
-import { connect } from 'react-redux';
-import { compose } from 'redux';
-import { createStructuredSelector } from 'reselect';
+import React, {memo, useState} from 'react';
+import {Text} from 'react-native';
+import {connect} from 'react-redux';
+import {compose} from 'redux';
+import {createStructuredSelector} from 'reselect';
 
-import { StyleSheet } from 'react-native';
+import {StyleSheet} from 'react-native';
 import OTPInputView from '@twotalltotems/react-native-otp-input';
 import styled from 'styled-components/native';
 
@@ -13,34 +13,40 @@ import Button from '../../components/Button';
 import Spacing from '../../components/Spacing';
 
 // utils
-import { useInjectReducer } from '../../utils/injectReducer';
-import { useInjectSaga } from '../../utils/injectSaga';
+import {useInjectReducer} from '../../utils/injectReducer';
+import {useInjectSaga} from '../../utils/injectSaga';
 
 // redux
-import { makeSelectRequesting } from './redux/selectors';
+import {makeSelectRequesting} from './redux/selectors';
 import saga from './redux/saga';
 import reducer from './redux/reducer';
-import { codeVerification } from './redux/actions';
+import {codeVerification} from './redux/actions';
 
 // constants
 const key = 'codeVerification';
 
-const CodeVerification = ({ onSubmitForm, requesting }) => {
-  useInjectReducer({ key, reducer });
-  useInjectSaga({ key, saga });
+const CodeVerification = ({onSubmitCode, requesting}) => {
+  useInjectReducer({key, reducer});
+  useInjectSaga({key, saga});
+
+  // states
+  const [code, setCode] = useState();
 
   return (
     <Container>
       <LoginContainer>
         <HeaderText>Enter the Verification Code!</HeaderText>
         <OTPInputView
-          style={{ width: '100%', height: 100 }}
+          style={{width: '100%', height: 100}}
           codeInputFieldStyle={styles.underlineStyleBase}
           codeInputHighlightStyle={styles.underlineStyleHighLighted}
           pinCount={4}
+          onCodeChanged={e => setCode(e)}
         />
         <Spacing>
-          <Button loading={requesting} onPress={onSubmitForm}>Continue</Button>
+          <Button loading={requesting} onPress={onSubmitCode(code)}>
+            Register
+          </Button>
         </Spacing>
       </LoginContainer>
     </Container>
@@ -52,7 +58,7 @@ const mapStateToProps = createStructuredSelector({
 });
 
 export const mapDispatchToProps = dispatch => ({
-  onSubmitForm: data => dispatch(codeVerification(data)),
+  onSubmitCode: data => dispatch(codeVerification(data)),
 });
 
 const withConnect = connect(mapStateToProps, mapDispatchToProps);

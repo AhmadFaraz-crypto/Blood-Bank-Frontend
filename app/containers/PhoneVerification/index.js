@@ -1,4 +1,4 @@
-import React, {memo, useEffect} from 'react';
+import React, {memo, useEffect, useState} from 'react';
 import {Text, StyleSheet} from 'react-native';
 import {connect} from 'react-redux';
 import {compose} from 'redux';
@@ -47,14 +47,18 @@ const PhoneVerification = ({
     onSubmitForm(data);
   };
 
+  // states
+  const [phoneCode, setPhoneCode] = useState('');
+
   return (
     <Container>
       <LoginContainer>
         <HeaderText>Please Verify your phone Number!</HeaderText>
         <RNPickerSelect
           useNativeAndroidPickerStyle={false}
-          placeholder={{ label: "Select your country", value: null }}
-          onValueChange={value => console.log(value)}
+          placeholder={{label: 'Select your country', value: null}}
+          onValueChange={value => setPhoneCode(value)}
+          placeholderTextColor="black"
           style={customPickerStyles}
           items={
             countries &&
@@ -65,24 +69,31 @@ const PhoneVerification = ({
           }
         />
         <Spacing>
-          <Controller
-            control={control}
-            render={({field: {onChange, onBlur, value}}) => (
-              <Input
-                onBlur={onBlur}
-                placeholder="Phone No"
-                onChangeText={value => onChange(value)}
-                value={value}
-              />
-            )}
-            name="phone"
-            rules={{required: true}}
-            defaultValue=""
-          />
+          <PhoneNumber>
+            <PhoneCode>{phoneCode ? phoneCode : '+00'}</PhoneCode>
+            <Controller
+              control={control}
+              render={({field: {onChange, onBlur, value}}) => (
+                <Input
+                  onBlur={onBlur}
+                  placeholder={'Phone No'}
+                  onChangeText={value =>
+                    onChange(phoneCode ? phoneCode + value : value)
+                  }
+                  value={value}
+                />
+              )}
+              name="phone"
+              rules={{required: true}}
+              defaultValue=""
+            />
+          </PhoneNumber>
           {errors.phone && <Text>This is required.</Text>}
         </Spacing>
         <Spacing>
-          <Button loading={requesting} onPress={handleSubmit(onSubmit)}>Continue</Button>
+          <Button loading={requesting} onPress={handleSubmit(onSubmit)}>
+            Continue
+          </Button>
         </Spacing>
       </LoginContainer>
     </Container>
@@ -121,6 +132,19 @@ const HeaderText = styled.Text`
   font-weight: bold;
   text-align: center;
   padding-bottom: 30px;
+`;
+
+const PhoneNumber = styled.View`
+  flex-direction: row;
+  align-items: flex-start;
+`;
+
+const PhoneCode = styled.Text`
+  border: 1px solid #ffb6c1;
+  border-radius: 10px;
+  padding: 14px;
+  margin-right: 10px;
+  width: 25%;
 `;
 
 const customPickerStyles = StyleSheet.create({
